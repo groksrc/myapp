@@ -1,0 +1,17 @@
+version: '3.5'
+
+services:
+  myapp:
+    image: myapp:latest
+    container_name: myapp
+    env_file: docker.env
+    depends_on:
+      - db
+    ports:
+      - "4000:4000"
+
+  db:
+    image: postgres:9.6
+    container_name: db
+    environment:
+      POSTGRES_DB: myapp_dev
