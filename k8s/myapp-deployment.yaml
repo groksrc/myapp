@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-deployment
+  labels:
+    app: myapp
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: myapp
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 34%
+      maxUnavailable: 34%
+  template:
+    metadata:
+      name: myapp
+      namespace: myapp
+      labels:
+        app: myapp
+    spec:
+      containers:
+      - name: myapp
+        image: myapp:latest
+        imagePullPolicy: Never
+        env:
+          - name: HOSTNAME
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+          - name: ERLANG_COOKIE
+            value: myapp-secret-cookie
+          - name: DB_URL
+            value: postgresql://postgres:postgres@db/myapp_prod
+          - name: REPLACE_OS_VARS
+            value: "true"
+          - name: PORT
+            value: "4000"
+          - name: SERVICE_NAME
+            value: myapp-service.myapp.svc.cluster.local
+          - name: SECRET_KEY_BASE
+            value: super-secret-key-base
+        resources: {}
+        securityContext:
+          privileged: false
+          procMount: Default
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
